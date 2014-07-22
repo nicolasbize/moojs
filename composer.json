@@ -1,0 +1,18 @@
+{
+    "name": "nicolasbize/moojs",
+    "description": "Minimalist object-oriented javascript framework",
+    "version": "1.0",
+    "type": "component",
+    "homepage": "http://nicolasbize.com/moojs",
+    "license": "MIT",
+    "require": {
+
+    },
+    "extra": {
+        "component": {
+            "scripts": [
+                "moo.js"
+            ]
+        }
+    }
+}

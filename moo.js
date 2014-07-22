@@ -4,10 +4,9 @@
  *
  * Author:       Nicolas Bize
  * Created:      Jul 20th 2014
+ * Last Updated: Jul 22nd 2014
  * Version:      1.0
  * Licence:      MooJs is licenced under MIT licence (http://opensource.org/licenses/MIT)
- *
- * Provides object-oriented notions using named functions for better debugging.
  */
 (function(){
 
@@ -61,14 +60,14 @@
             var ns = idxNs > 0 ? Js.ns(fullClsName.substring(0, idxNs)) : window;
             var cls = fullClsName.substring(idxNs+1);
             // extract info from arguments
-            var superclass = args[2] ? args[1] : Object;
+            var superclass = args[2] ? args[1].prototype : Object;
             var cfg = args[2] || args[1];
             // create an init function if there is none
             cfg.init = cfg.init || function(cfg){};
             // build the class through a named function
             // call init within the constructor
             ns[cls] = new Function(
-                 "return function " + cls + "(cfg){ this.init(cfg); }"
+                 "return function " + cls + "(cfg){ Js.apply(this, cfg); this.init(cfg); }"
             )();
             // extend the superclass using Object.create (sry IE8-)
             if(args[2]){
@@ -97,7 +96,6 @@
                     }
                 }
             }
-            this.fire('init', this);
         },
         fire: function(){
             var args = Array.prototype.slice.call(arguments);
@@ -120,24 +118,3 @@
         }
     });
 })();
-
-
-// Js.create("my.ns.Person", Js.Observable, {
-//     init: function(cfg){
-//         this.grade = 12;
-//         this.superclass.init.call(this, cfg);
-//     },
-//     events: {
-//         init: function(s){
-//             console.debug(s.grade);
-//         }
-//     },
-//     sayBye: function(){
-//         console.debug("bye!");
-//     },
-//     sayHello: function(){
-//         console.debug("Hello!!");
-//     }
-// });
-
-// var p = new my.ns.Person();
