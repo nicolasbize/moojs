@@ -74,19 +74,25 @@ describe('Moo Js', function() {
     });
 
     describe('.create(cls, {...})', function() {
-        Js.create('My.namespace.Person', {
-            init: function(cfg){
+        Js.create(
+            'My.namespace',
+            function Person(cfg){
+                // We'll have to manually call Js.apply here
+                // This mixes in instantiation options into an instance
+                Js.apply(this, cfg);
                 this.age = cfg.age;
                 this.sex = cfg.sex || 'male';
                 this.name = cfg.name;
             },
-            sayHello: function(person){
-                return "{0} : Hello, {1}!".format(this.name, person.name);
-            },
-            smile: function(){
-                return "{0} is smiling.".format(this.name);
+            {
+                sayHello: function(person){
+                    return "{0} : Hello, {1}!".format(this.name, person.name);
+                },
+                smile: function(){
+                    return "{0} is smiling.".format(this.name);
+                }
             }
-        });
+        );
         var john = new My.namespace.Person({
             name: 'John'
         });
@@ -118,18 +124,22 @@ describe('Moo Js', function() {
         });
 
         // let's extend the Person class
-        Js.create('My.namespace.Student', My.namespace.Person, {
-            init: function(cfg){
-                this.superclass.init.call(this, cfg);
+        Js.create(
+            'My.namespace',
+            function Student(cfg){
+                this.superclass.call(this, cfg);
                 this.name = "Student " + this.name;
             },
-            sayHello: function(person){
-                return "{0} : Eh yoo, {1}!!!".format(this.name, person.name);
+            {
+                sayHello: function(person){
+                    return "{0} : Eh yoo, {1}!!!".format(this.name, person.name);
+                },
+                study: function(){
+                    return "bzzz...";
+                }
             },
-            study: function(){
-                return "bzzz...";
-            }
-        });
+            My.namespace.Person
+        );
         var nick = new My.namespace.Student({
             name: 'Nick',
             sayBye: function(person){
