@@ -51,42 +51,46 @@
          * Usage: Js.create("Namespace.Classname", {func1: ..., func2: ...});
          *        Js.create("Namespace.Classname", SuperClass, {func1: ..., func2: ...});
          */
-        create: function(){
-            // make a regular array of arguments
-            var args = Array.prototype.slice.call(arguments);
-            // extract namespace and class name
-            var fullClsName = args[0];
-            var idxNs = fullClsName.lastIndexOf('.');
-            var ns = idxNs > 0 ? Js.ns(fullClsName.substring(0, idxNs)) : window;
-            var cls = fullClsName.substring(idxNs+1);
-            // extract info from arguments
-            var superclass = args[2] ? args[1].prototype : Object;
-            var cfg = args[2] || args[1];
-            // create an init function if there is none
-            cfg.init = cfg.init || function(cfg){};
-            // build the class through a named function
-            // call init within the constructor
-            ns[cls] = new Function(
-                 "return function " + cls + "(cfg){ Js.apply(this, cfg); this.init(cfg); }"
-            )();
-            // extend the superclass using Object.create (sry IE8-)
-            if(args[2]){
-                ns[cls].prototype = Object.create(args[1].prototype);
-                ns[cls].prototype.constructor = ns[cls];
+        create: function(namespace, Constructor, cfg, SuperClass){
+            // Make sure a constructor was provided
+            if (!Constructor) {
+              throw new Error('moo: You must provide a constructor');
             }
-            // add all the properties (methods, vars, ...) to the newly created class
-            Js.apply(ns[cls].prototype, cfg);
-            // add the superclass property to access parent stuff
-            ns[cls].prototype.superclass = superclass;
 
+            // Check if the function was named
+            var name = Constructor.name;
+            if (!name) {
+              throw new Error('moo: You must provide a named constructor');
+            }
+
+            // Figure out if we're using a namespace or global scope
+            var idxNs = namespace.lastIndexOf('.');
+            var ns = idxNs === -1 ? (window[namespace] = window[namespace] || {}) : Js.ns(namespace);
+
+            // assign as a property of the namespace
+            ns[name] = Constructor;
+
+            // extend the superclass using Object.create (sry IE8-)
+            if(SuperClass){
+                Constructor.prototype = Object.create(SuperClass.prototype);
+                Constructor.prototype.constructor = Constructor;
+            }
+
+            // add all the properties (methods, vars, ...) to the newly created class
+            Js.apply(Constructor.prototype, cfg);
+
+            // add the superclass property to access parent stuff
+            Constructor.prototype.superclass = SuperClass || Object;
+
+            return Constructor;
         }
     };
 
     /**
      * Observable class which supports listeners & callbacks
      */
-    Js.create("Js.Observable", {
-        init: function(cfg){
+    Js.create("Js",
+      function Observable(cfg){
             this.callbacks = {};
             if(this.events){
                 var scope = this.events.scope || this;
@@ -97,6 +101,7 @@
                 }
             }
         },
+        {
         fire: function(){
             var args = Array.prototype.slice.call(arguments);
             var ev = args.shift();
