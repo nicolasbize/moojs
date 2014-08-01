@@ -4,8 +4,8 @@
  *
  * Author:       Nicolas Bize
  * Created:      Jul 20th 2014
- * Last Updated: Jul 22nd 2014
- * Version:      1.0
+ * Last Updated: Jul 31st 2014
+ * Version:      1.1
  * Licence:      MooJs is licenced under MIT licence (http://opensource.org/licenses/MIT)
  */
 (function(){
@@ -91,6 +91,7 @@
      */
     Js.create("Js",
       function Observable(cfg){
+            Js.apply(this, cfg);
             this.callbacks = {};
             if(this.events){
                 var scope = this.events.scope || this;
